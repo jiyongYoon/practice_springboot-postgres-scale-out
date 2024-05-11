@@ -1,0 +1,10 @@
+### save
+POST http://localhost:8080/api
+Content-Type: application/json
+
+{
+  "name": "hello1"
+}
+
+### get
+GET http://localhost:8080/api/2
