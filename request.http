@@ -7,4 +7,17 @@ Content-Type: application/json
 }
 
 ### get
-GET http://localhost:8080/api/2
+GET http://localhost:8080/api/1
+
+###############################
+
+### save
+POST http://localhost:8088/api
+Content-Type: application/json
+
+{
+  "name": "hello1"
+}
+
+### get
+GET http://localhost:8088/api/2

@@ -1,12 +1,62 @@
 version: "3.6"
 services:
-  test-boot:
-    container_name: test-boot
-    image: test-boot
+  db-replication-app:
+    container_name: db-replication-app
+    image: db-replication-app
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 8080:8080
+      - 8088:8088
+    env_file:
+      - ./postgres.env
     environment:
       SPRING_PROFILE: prod
+    networks:
+      - replication-test
+    depends_on:
+      pg-0:
+        condition: service_healthy
+        restart: true
+
+  pg-0:
+    image: docker.io/bitnami/postgresql-repmgr:16
+    ports:
+      - 5432
+    volumes:
+      - ./init/:/docker-entrypoint-initdb.d/
+      - ./pg-0:/bitnami/postgresql
+    env_file:
+      - ./postgres.env
+      - ./repmgr.env
+    environment:
+      - REPMGR_NODE_NAME=pg-0
+      - REPMGR_NODE_NETWORK_NAME=pg-0
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    networks:
+      - replication-test
+
+  pg-1:
+    image: docker.io/bitnami/postgresql-repmgr:16
+    ports:
+      - 5432
+    volumes:
+      - ./pg-1:/bitnami/postgresql
+    env_file:
+      - ./postgres.env
+      - ./repmgr.env
+    environment:
+      - REPMGR_NODE_NAME=pg-1
+      - REPMGR_NODE_NETWORK_NAME=pg-1
+    networks:
+      - replication-test
+    depends_on:
+      - pg-0
+
+networks:
+  replication-test:
+    external: false

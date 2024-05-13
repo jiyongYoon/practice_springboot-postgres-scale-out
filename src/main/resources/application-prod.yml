@@ -1,14 +1,18 @@
+server:
+  port: 8088
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://host.docker.internal:10011/replication_test?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
-    username: postgres
-    password: postgres
+    # postgresql dbms가 pg-0 서비스이기 때문에, pg-0 을 통해서 db에 접근
+    url: jdbc:postgresql://pg-0:5432/replication_test?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    username: ${POSTGRESQL_USERNAME}
+    password: ${POSTGRESQL_PASSWORD}
   jpa:
     generate-ddl: false
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
