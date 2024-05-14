@@ -57,6 +57,36 @@ services:
     depends_on:
       - pg-0
 
+  pgpool:
+    image: docker.io/bitnami/pgpool:latest
+    ports:
+      - 5432:5432
+    environment:
+      - PGPOOL_BACKEND_NODES=0:pg-0:5432,1:pg-1:5432
+      - PGPOOL_BACKEND_APPLICATION_NAMES=0:pg-0:5432,1:pg-1:5432
+      - PGPOOL_SR_CHECK_USER=repmgr
+      - PGPOOL_SR_CHECK_PASSWORD=reptest
+      - PGPOOL_ENABLE_LDAP=no
+      - PGPOOL_POSTGRES_USERNAME=postgres
+      - PGPOOL_POSTGRES_PASSWORD=postgres
+      - PGPOOL_ADMIN_USERNAME=pgpool
+      - PGPOOL_ADMIN_PASSWORD=pgpool
+      - PGPOOL_ENABLE_LOAD_BALANCING=yes
+#      - PGPOOL_CONNECTION_LIFE_TIME=10 이 부분 테스트가 필요한데... pgpool 도커 내에서 psql 접속이 안된다.....
+      - PGPOOL_POSTGRES_CUSTOM_USERS=test
+      - PGPOOL_POSTGRES_CUSTOM_PASSWORDS=test
+      - PGPOOL_ENABLE_LOG_PER_NODE_STATEMENT=yes
+      - PGPOOL_ENABLE_LOG_CONNECTIONS=yes
+      - PGPOOL_ENABLE_LOG_HOSTNAME=yes
+      - PGPOOL_AUTO_FAILBACK=yes
+    healthcheck:
+      test: [ "CMD", "/opt/bitnami/scripts/pgpool/healthcheck.sh" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - replication-test
+
 networks:
   replication-test:
     external: false
